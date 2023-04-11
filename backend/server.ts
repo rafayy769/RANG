@@ -18,11 +18,24 @@ const io = new Server(
 server.listen(3001, ()=>{
     console.log("SERVER IS LISTENING ON PORT 3001")
 })
+
+let users = []
+
 io.on("connection",(socket)=>{
     console.log("user connected with a socket id", socket.id)
     //add custom events here
-    socket.on("myEvent",(myData)=>{
+    socket.on("join",(myData)=>{
         console.log('Received myMessage:', myData);
     })
+
+    // if(users.length < 4){
+    //     users.push(socket)
+    //     console.log(users)
+    // }
+    // else
+    // {
+    //     console.log("Game is full, start the game")
+    //     socket.emit("startGame", "Game is full")
+    // }
 
 })
