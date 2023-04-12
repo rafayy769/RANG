@@ -1,15 +1,4 @@
-import Deck from "./deck";
-
-export const Events = {
-    NEW_CONNECTION: "new-connection",
-    PLAYER_JOINED: "join",
-    GAME_STARTED: "start",
-    CARD_PLAYED: "play",
-    TRICK_OVER: "trickEnd",
-    ROUND_OVER: "round-over",
-    GAME_OVER: "gameOver",
-    ERROR: "error"
-}
+import { Events } from "./Events";
 
 export const Suits = {
     HEARTS: "H",
@@ -52,7 +41,6 @@ class Globals {
     MAX_PLAYERS: number = 4;
     MAX_CARDS: number = 13;
     MAX_ROUNDS: number = 7;
-    CardsDeck: Deck = new Deck();
     APP_STATES: typeof APP_STATES;
 
     constructor() {

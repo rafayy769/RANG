@@ -8,15 +8,15 @@ const socket = io('http://localhost:3001',{ transports: ["websocket"] });
 socket.connect()
 
 function App() {
-  
   return (
-    <div>
+    <div className="App">
+      <header className="App-header">
       <Router>
         <Routes>
           <Route path="/" element={<HomePage socket={socket} />} />
         </Routes>
       </Router>
-
+      </header>
     </div>
   );
 }

@@ -3,48 +3,70 @@
 // Path: backend/controller/connectionHandler.ts
 import GLOBALS from "../Entities/globals";
 import { Socket } from "socket.io";
-import { Events } from "../Entities/globals";
+import { Events } from "../Entities/Events";
 import AppState from "../Entities/AppState";
 import Deck from "../Entities/deck";
 import User from "../Entities/user";
+import GameState from "../Entities/GameState";
 
-class ConnectionHandler
+export default class ConnectionHandler
 {
-    ApplicationState: AppState = {
-        users: [],
-        currentState: GLOBALS.APP_STATES.LOBBY,
-        gameState: undefined
-    };
+    ApplicationState: AppState;
 
-    constructor()
+    constructor(Appstate: AppState)
     {
-        this.ApplicationState = {
-            users: [],
-            currentState: GLOBALS.APP_STATES.LOBBY,
-            gameState: undefined
-        };
+        this.ApplicationState = Appstate;
     }
-
-    // This function is called when a user connects to the server
-    // It adds the user to the users array
-    // It also sends a message to the user that they have joined the game
-    // It also sends a message to all other users that a new user has joined the game
-
 
     public onUserConnect(socket: Socket) 
     {
-        console.log("user connected with a socket id", socket.id)
+        console.log("A user connected with the socket id", socket.id)
 
         if (this.ApplicationState.currentState === GLOBALS.APP_STATES.LOBBY)
         {
+            return true;
+        }
+
+        return false;
+    }
+
+    public onUserJoin(socket: Socket, data: any)
+    {
+        console.log(`${data.user_name} trying to join`)
+        if (this.ApplicationState.users.length === GLOBALS.MAX_PLAYERS)
+        {
+            console.log("\tGame is full");
+            return;
+        }
+        else
+        {
             let connected_user: User = {
                 id: this.ApplicationState.users.length,
-                user_name: "",
+                user_name: data.playerName,
                 socket: socket
-            }
+            };
+            this.ApplicationState.users.push(connected_user);
+            console.log(`\t${data.user_name} joined successfully`);   
+        }
+
+
+        return;
+        if (this.ApplicationState.currentState === GLOBALS.APP_STATES.LOBBY)    
+        {
+            let connected_user: User = {
+                id: this.ApplicationState.users.length,
+                user_name: data.user_name,
+                socket: socket
+            };
             this.ApplicationState.users.push(connected_user);
             this.sendTo(connected_user.id, GLOBALS.Events.NEW_CONNECTION, "You have joined the game");
             this.broadcastMessage(GLOBALS.Events.NEW_CONNECTION, `${connected_user.user_name} has joined the game`);
+            if (this.ApplicationState.users.length === GLOBALS.MAX_PLAYERS)
+            {
+                this.ApplicationState.currentState = GLOBALS.APP_STATES.GAME;
+                this.ApplicationState.gameState = new GameState();
+                this.broadcastMessage(GLOBALS.Events.GAME_STARTED, "The game has started");
+            }
         }
         else
         {
@@ -54,6 +76,7 @@ class ConnectionHandler
             // socket.close()
         }
     }
+
 
     private sendTo = (playerId: number, eventName: String, data: any) => 
     {

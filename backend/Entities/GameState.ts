@@ -120,15 +120,41 @@ class GameState
      * 
      * @returns The next player.
      */
-    getNextPlayer()
-    {
-        // next player is determined as follows
-        // check for errors such as no players or no current player or current player is not in the players array
-        if (this.players.length === 0 || this.currentPlayerId === -1 || !this.players.find(player => player.user.id === this.currentPlayerId) || this.currentRoundNumber === 0)
-        {
-            return {} as Player;
-        }
-    }
+    getNextPlayer = () => {}; // TODO: Implement this function
+
+    /**
+     * @remarks
+     * Determines the winner of the round.
+     * 
+     * @returns The winner of the round.
+     */
+    getRoundWinner = () => {}; // TODO: Implement this function
+
+    /**
+     * @remarks
+     * Determines the winner of the game.
+     * 
+     * @returns The winner of the game.
+     */
+    getGameWinner = () => {}; // TODO: Implement this function
+
+    /**
+     * @remarks
+     * Determines whether the move is valid.
+     * 
+     * @returns Whether the move is valid.
+     * @param play - The play that was made by the player
+     */
+    isValidMove = (play: PlayTurn) => {}; // TODO: Implement this function
+
+    /**
+     * @remarks
+     * Determines whether the game is over.
+     * 
+     * @returns Whether the game is over.
+     * @param play - The play that was made by the player   
+     */
+    isGameOver = (play: PlayTurn) => {}; // TODO: Implement this function
 };  
 
 export default GameState;
