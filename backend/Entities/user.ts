@@ -1,7 +1,7 @@
 import { Socket } from "socket.io";
 
 
-type User = {
+class User{
     /**
      * @remarks
      * This is a user object
@@ -11,9 +11,9 @@ type User = {
      * @param socket - The socket of the user
      */
 
-    id: number,
-    user_name: string,
-    socket: Socket
+    id: number = -1;
+    user_name: string = "";
+    socket: Socket = {} as Socket;
 };
 
 export default User;

@@ -16,12 +16,17 @@ export default class ConnectionHandler
     constructor(Appstate: AppState)
     {
         this.ApplicationState = Appstate;
+        this.onUserJoin = this.onUserJoin.bind(this);
     }
 
-    public onUserConnect(socket: Socket) 
+    set(appState: AppState)
+    {
+        this.ApplicationState = appState;
+    }
+
+    onUserConnect(socket: Socket) 
     {
         console.log("A user connected with the socket id", socket.id)
-
         if (this.ApplicationState.currentState === GLOBALS.APP_STATES.LOBBY)
         {
             return true;
@@ -30,9 +35,8 @@ export default class ConnectionHandler
         return false;
     }
 
-    public onUserJoin(socket: Socket, data: any)
+    onUserJoin(socket: Socket, data: any)
     {
-        console.log(`${data.user_name} trying to join`)
         if (this.ApplicationState.users.length === GLOBALS.MAX_PLAYERS)
         {
             console.log("\tGame is full");
@@ -40,17 +44,30 @@ export default class ConnectionHandler
         }
         else
         {
-            let connected_user: User = {
+            let connected_user: User = 
+            {
                 id: this.ApplicationState.users.length,
                 user_name: data.playerName,
                 socket: socket
             };
+            console.log(`\t${connected_user.user_name} joined successfully`);
             this.ApplicationState.users.push(connected_user);
-            console.log(`\t${data.user_name} joined successfully`);   
+
+            this.broadcastMessage(GLOBALS.Events.PLAYER_JOINED, {
+                playerName: connected_user.user_name,
+                playerCount: this.ApplicationState.users.length,
+            });
+
+            if (this.ApplicationState.users.length === GLOBALS.MAX_PLAYERS)
+            {
+                this.ApplicationState.currentState = GLOBALS.APP_STATES.GAME;
+                this.ApplicationState.gameState = new GameState();
+                // this.broadcastMessage(GLOBALS.Events.GAME_STARTED, "The game has started");
+            }
         }
 
-
         return;
+
         if (this.ApplicationState.currentState === GLOBALS.APP_STATES.LOBBY)    
         {
             let connected_user: User = {

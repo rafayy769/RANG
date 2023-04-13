@@ -1,5 +1,6 @@
 import User from "./user";
 import GameState from "./GameState";
+import GLOBALS from "./globals";
 
 class AppState
 {
@@ -19,7 +20,7 @@ class AppState
     constructor()
     {
         this.users = [];
-        this.currentState = undefined;
+        this.currentState = GLOBALS.APP_STATES.LOBBY;
         this.gameState = undefined;
     }
 };

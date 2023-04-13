@@ -14,6 +14,8 @@ function App() {
       <Router>
         <Routes>
           <Route path="/" element={<HomePage socket={socket} />} />
+          <Route path="/game" element={<div>Game</div>} />
+          <Route path="/game_over" element={<div>Game Over</div>} />
         </Routes>
       </Router>
       </header>

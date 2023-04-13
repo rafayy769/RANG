@@ -65,10 +65,12 @@ class GameState
     sequence: GameRound[] = [];
     deck: Deck = new Deck();
 
-    constructor()
+    constructor(players: User[] = [])
     {
         this.deck.reset();
         this.deck.shuffle();
+
+        players.forEach((user) => this.addPlayer(user));
     }
 
     /**
