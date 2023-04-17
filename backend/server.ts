@@ -1,12 +1,13 @@
-import AppState from "./Entities/AppState";
-import User from "./Entities/user";
+import AppState from "./types/AppState";
+import User from "./types/user";
+
 import ConnectionHandler from "./controller/connectionHandler";
 import GameHandler from "./controller/gameHandler";
-import EventHandler, { getEventData } from "./Entities/Events";
-import GLOBALS from "./Entities/globals";
-import { Socket } from "socket.io";
+import EventHandler, { getEventData } from "./types/Events";
+import MessageHandler from "./controller/messageHandler";
 
-// const { Socket } = require( "socket.io");
+import GLOBALS from "./types/globals";
+import { Socket } from "socket.io";
 
 const express = require("express");
 const app = express();
@@ -33,6 +34,7 @@ const APP_STATE = new AppState();
 // create handler objects. These objects will handle all the events (specifically the methods provided by these objects.)
 const CONNECTION_HANDLER = new ConnectionHandler(APP_STATE);
 const GAME_HANDLER = new GameHandler(APP_STATE);
+const MESSAGE_HANDLER = new MessageHandler(APP_STATE);
 
 // setUp Event Handlers. A list of event handlers, where we just define what event we want to listen for and what handler we want to call when that event is triggered.
 
@@ -40,7 +42,11 @@ const GAME_HANDLER = new GameHandler(APP_STATE);
 const connectionEventHandlers: EventHandler[] = [
     {
         event: GLOBALS.Events.PLAYER_JOINED,
-        handler: CONNECTION_HANDLER.onUserJoin
+        handler: CONNECTION_HANDLER.onPlayerJoin
+    },
+    {
+        event: GLOBALS.Events.NEW_CONNECTION,
+        handler: CONNECTION_HANDLER.onPlayerConnect
     }
 ];
 
@@ -49,8 +55,30 @@ const gameEventHandlers: EventHandler[] = [
     {
         event: GLOBALS.Events.CARD_PLAYED,
         handler: GAME_HANDLER.onMoveMade
+    },
+    {
+        event: GLOBALS.Events.GAME_STARTED,
+        handler: GAME_HANDLER.onGameStart
+    },
+    {
+        event: GLOBALS.Events.CARD_PLAYED,
+        handler: GAME_HANDLER.onMoveMade
+    },
+    {
+        event: GLOBALS.Events.RANG_SELECTED,
+        handler: GAME_HANDLER.onRangSelected
     }
 ];
+
+// This is a list of event handlers for message events
+const messageEventHandlers: EventHandler[] = [
+    {
+        event: GLOBALS.Events.MESSAGE,
+        handler: MESSAGE_HANDLER.onMessageReceived
+    }
+];
+
+const EventHandlers : EventHandler[][] = [connectionEventHandlers, gameEventHandlers, messageEventHandlers];
 
 io.on("connection", (socket: Socket) => {
     // This is called when a user connects to the server
@@ -60,22 +88,17 @@ io.on("connection", (socket: Socket) => {
     if (!canConnect)
     {
         console.log("User tried to connect but the game is full.");
-        socket.emit(GLOBALS.Events.ERROR, getEventData(GLOBALS.Events.ERROR, GLOBALS.stdErrors.GAME_FULL));
+        socket.emit(GLOBALS.Events.CONNECTION_FAILED, getEventData(GLOBALS.Events.CONNECTION_FAILED, GLOBALS.stdErrors.GAME_FULL));
         socket.disconnect();
         return;
     }
 
-    // register all the connection event handlers
-    connectionEventHandlers.forEach((eventHandler) => {
-        socket.on(eventHandler.event, (data) => {
-            eventHandler.handler(socket, data);
+    EventHandlers.forEach((eventHandlerList) => {
+        eventHandlerList.forEach((eventHandler) => {
+            socket.on(eventHandler.event, (data) => {
+                console.log("Event received: ", eventHandler.event);
+                eventHandler.handler(socket, data);
+            });
         });
     });
-
-    // register all the game event handlers
-    // gameEventHandlers.forEach((eventHandler) => {
-    //     socket.on(eventHandler.event, (data) => {
-    //         eventHandler.handler(socket, data);
-    //     });
-    // });
 });

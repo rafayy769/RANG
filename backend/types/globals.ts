@@ -12,7 +12,9 @@ export const stdErrors = {
     INVALID_CARD: "You can't play this card. Illegel move",
     INVALID_TURN: "Invalid turn",
     INVALID_ROUND: "Invalid round",
-    INVALID_GAME: "Invalid game"
+    INVALID_GAME: "Invalid game",
+    USERNAME_TAKEN: "Sorry, this username is already taken",
+    GAME_RUNNING: "Sorry, you can't join the game. The game is already in progress"
 };
 
 export const APP_STATES = {

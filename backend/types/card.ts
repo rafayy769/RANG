@@ -13,7 +13,9 @@ type Card = {
      * 
     */
 
-    value: string;
+    rank: string;
+    suit_symbol: string;
+    suit_name: string;
 };
 
 export default Card;

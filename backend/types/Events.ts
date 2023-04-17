@@ -2,13 +2,24 @@ import { Socket } from "socket.io";
 
 export const Events = {
     NEW_CONNECTION: "new-connection",
+    CONNECTION_FAILED: "connection-failed",
     PLAYER_JOINED: "join",
     GAME_STARTED: "start",
     CARD_PLAYED: "play",
     TRICK_OVER: "trickEnd",
     ROUND_OVER: "round-over",
     GAME_OVER: "gameOver",
-    ERROR: "error"
+    ERROR: "error",
+    PLAYER_DISCONNECTED: "disconnect",
+    PLAYER_RECONNECTED: "reconnect",
+    MESSAGE: "message",
+    VALID_MOVE: "validMove",
+    INVALID_MOVE: "invalidMove",
+    RANG_SELECTED: "rangSelected",
+    LOAD_STATE: "loadState",
+    SELECT_RANG: "selectRang",
+    UPDATE_HAND: "updateHand",
+    MOVE_MADE: "moveMade",
 };
 
 type EventData = {
