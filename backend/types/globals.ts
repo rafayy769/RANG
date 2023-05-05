@@ -1,4 +1,5 @@
 import { Events } from "./Events";
+import Card from "./card";
 
 export const Suits = {
     HEARTS: "H",
@@ -23,6 +24,18 @@ export const APP_STATES = {
     GAME_OVER: "gameOver"
 };
 
+const hidden_card : Card = {
+    rank: "",
+    suit_name: "",
+    suit_symbol: ""
+};
+
+const no_card : Card = {
+    rank: "empty",
+    suit_name: "",
+    suit_symbol: ""
+};
+
 class Globals {
     /**
      * @remarks
@@ -44,6 +57,8 @@ class Globals {
     MAX_CARDS: number = 13;
     MAX_ROUNDS: number = 7;
     APP_STATES: typeof APP_STATES;
+    HIDDEN_CARD: Card = hidden_card;
+    NO_CARD: Card = no_card;
 
     constructor() {
         this.Events = Events;

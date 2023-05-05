@@ -47,8 +47,7 @@ export type GameRound = {
     winner_id: number
 };
 
-class GameState
-{
+class GameState {
     /**
      * @remarks
      * Represents the state of the game.
@@ -70,8 +69,8 @@ class GameState
     gameRounds: GameRound[] = [];
     rangChooser: number = -1;
 
-    constructor(players: User[] = [])
-    {
+    constructor(players: User[] = []) {
+
         // if players are empty return
         if (players.length === 0) return;
 
@@ -84,13 +83,12 @@ class GameState
         let cards = this.deck.drawMultiple(4);
 
         // make sure no cards have the same rank
-        while (cards[0].rank === cards[1].rank || cards[0].rank === cards[2].rank || cards[0].rank === cards[3].rank || cards[1].rank === cards[2].rank || cards[1].rank === cards[3].rank || cards[2].rank === cards[3].rank) 
-        {
+        while (cards[0].rank === cards[1].rank || cards[0].rank === cards[2].rank || cards[0].rank === cards[3].rank || cards[1].rank === cards[2].rank || cards[1].rank === cards[3].rank || cards[2].rank === cards[3].rank) {
 
             this.deck.reset();
             this.deck.shuffle();
             cards = this.deck.drawMultiple(4);
-        
+
         }
 
         // give each player a starting card for toss
@@ -105,7 +103,7 @@ class GameState
 
         // player with the highest ranked card is the rangChooser
         this.rangChooser = this.players.reduce((acc: number, curr: Player, index: number) => {
-            if (curr.current_card.rank > this.players[acc].current_card.rank) {
+            if (this.deck.compareCards(curr.current_card, this.players[acc].current_card, true)) {
                 return index;
             }
             return acc;
@@ -136,7 +134,7 @@ class GameState
         });
 
         console.log("Game initialized.");
-        console.log()
+        console.log();
     }
 
     /**
@@ -152,8 +150,7 @@ class GameState
      * @param Deck - The deck of the game
      */
 
-    reset()
-    {
+    reset() {
         this.players = [];
         this.RUNGsuit = "";
         this.currentPlayerId = -1;
@@ -169,8 +166,7 @@ class GameState
      * @param playerId - The id of the player
      * @returns The player object of the player with the given id
      */
-    getPlayerById(playerId: number) : Player
-    {
+    getPlayerById(playerId: number): Player {
         console.log("Lookin for id : " + playerId)
 
         let response = this.players.find((player: Player) => player.user.id == playerId) as Player;
@@ -178,8 +174,7 @@ class GameState
         return response;
     }
 
-    isTurn(playerId: number) : boolean
-    {
+    isTurn(playerId: number): boolean {
         return this.currentPlayerId === playerId;
     }
 
@@ -191,8 +186,7 @@ class GameState
      * @param handArr - The hand of the player
      * @param score - The score of the player
     */
-    addPlayer(userObj: User, handArr: Card[] = [], score: number = 0)
-    {
+    addPlayer(userObj: User, handArr: Card[] = [], score: number = 0) {
         this.players.push({
             user: userObj,
             hand: handArr,
@@ -209,8 +203,7 @@ class GameState
      * 
      * @returns The next player.
      */
-    getNextPlayer()
-    {
+    getNextPlayer() {
         if (this.gameRounds[this.currentRoundNumber] === undefined)
             throw new Error("Round not found");
 
@@ -225,38 +218,34 @@ class GameState
      * 
      * @returns The winner of the round.
      */
-    getRoundWinner(round: number)
-    {
+    getRoundWinner(round: number) {
         // find the winner of the round. the winner is the player which has the highest ranked card of the rang suit, if no one has the rang suit, then the winner is the player which has the highest ranked card of the suit that was played first
 
         if (this.gameRounds[round] === undefined)
             throw new Error("Round not found");
 
         let starting = this.gameRounds[round].plays[0].card;
-        let highest = {} as Card;
+        let winnerPlay = this.gameRounds[round].plays.reduce((acc: PlayTurn, curr: PlayTurn) => {
+            if (curr.card.suit_name === this.RUNGsuit && acc.card.suit_name !== this.RUNGsuit) {
+                return curr;
+            } else if (curr.card.suit_name === starting.suit_name && acc.card.suit_name !== starting.suit_name) {
+                return curr;
+            } else if (curr.card.suit_name === this.RUNGsuit && acc.card.suit_name === this.RUNGsuit) {
+                if (this.deck.compareCards(curr.card, acc.card)) {
+                    return curr;
+                }
+            } else if (curr.card.suit_name === starting.suit_name && acc.card.suit_name === starting.suit_name) {
+                if (this.deck.compareCards(curr.card, acc.card)) {
+                    return curr;
+                }
+            }
+            return acc;
+        }, this.gameRounds[round].plays[0]);
 
-        this.gameRounds[round].plays.forEach((play: PlayTurn) => 
-        {
-            if (play.card.suit_name === starting.suit_name && play.card.rank > highest.rank)
-                highest = play.card;
+        console.log("Winner play : ");
+        console.log(winnerPlay);
 
-            if (play.card.suit_name === this.RUNGsuit && highest.suit_name === this.RUNGsuit && play.card.rank > highest.rank)
-                highest = play.card;
-
-            if (play.card.suit_name === this.RUNGsuit && highest.suit_name !== this.RUNGsuit)
-                highest = play.card;
-
-            if (highest.suit_name === "")
-                highest = play.card;
-        });
-
-        console.log("Highest card is " + highest.suit_name + " " + highest.rank);
-
-        let winner = this.gameRounds[round].plays.find((play: PlayTurn) => play.card.suit_name === highest.suit_name && play.card.rank === highest.rank) as PlayTurn;
-
-        console.log("Winner is " + winner);
-
-        return winner.playerName;
+        return winnerPlay.playerName;
     }
 
     /**
@@ -279,7 +268,7 @@ class GameState
             return [a1.teamMateId, a2.teamMateId];
         else
             throw new Error("Game not over yet");
-    }; 
+    };
 
     /**
      * @remarks
@@ -288,8 +277,7 @@ class GameState
      * @returns Whether the move is valid.
      * @param play - The play that was made by the player
      */
-    isValidMove = (play: PlayTurn) => 
-    {
+    isValidMove = (play: PlayTurn) => {
         // when is a move valid? The move is valid if the player has the card in their hand and the card is of the same suit as the first card played in the round (if it's the first card played in the round, then the move is valid given that the move was made by the current player)
 
         let player = this.players.find((player: Player) => player.user.user_name === play.playerName);
@@ -299,9 +287,8 @@ class GameState
                 status: "error",
                 message: "Player not found"
             }
-        
-        if (this.currentPlayerId !== player.user.id)
-        {
+
+        if (this.currentPlayerId !== player.user.id) {
             console.log("Expected player id: " + this.currentPlayerId);
             console.log("Actual player id: " + player.user.id);
 
@@ -319,7 +306,6 @@ class GameState
                 message: "You do not have this card"
             }
 
-        
         // get the current round
         let currentRound = this.gameRounds[this.gameRounds.length - 1];
 
@@ -327,11 +313,10 @@ class GameState
         console.log(currentRound);
 
         // check if the card is of the same suit as the first card played in the round
-        if (currentRound.plays.length > 0)
-        {
+        if (currentRound.plays.length > 0) {
             let firstCard = currentRound.plays[0].card;
 
-            if (card.suit_name !== firstCard.suit_name)
+            if (card.suit_name !== firstCard.suit_name && player.hand.find((card: Card) => card.suit_name === firstCard.suit_name) !== undefined)
                 return {
                     status: "error",
                     message: "You must play a card of the same suit as the first card played in the round"
@@ -344,13 +329,11 @@ class GameState
         };
     };
 
-    playMove = (play: PlayTurn) =>
-    {
+    playMove = (play: PlayTurn) => {
         let player = this.players.find((player: Player) => player.user.user_name === play.playerName) as Player;
 
         this.players.forEach((player: Player) => {
-            if (player.user.user_name === play.playerName)
-            {
+            if (player.user.user_name === play.playerName) {
                 console.log(play.card)
                 // remove the card from the player's hand
                 player.hand = player.hand.filter((card: Card) => card.rank !== play.card.rank || card.suit_name !== play.card.suit_name || card.suit_symbol !== play.card.suit_symbol);
@@ -369,11 +352,11 @@ class GameState
         console.log("Round")
         console.log(this.gameRounds[this.gameRounds.length - 1]);
 
-        // check if the round is over
-        if (this.gameRounds[this.gameRounds.length - 1].plays.length === this.players.length)
-        {
+        // check if the last round is over
+        // TODO: use global constant for number of players
+        if (this.gameRounds[this.gameRounds.length - 1].plays.length === this.players.length) {
             console.log("Round over");
-                
+
             // the round is over
             // determine the winner of the round
             let winner_name = this.getRoundWinner(this.gameRounds.length - 1);
@@ -382,12 +365,11 @@ class GameState
             let winner = this.players.find((player: Player) => player.user.user_name === winner_name) as Player;
 
             let winner_id = winner.user.id;
+            this.gameRounds[this.gameRounds.length - 1].winner_id = winner_id;
+            this.currentPlayerId = winner_id;
 
             // update the score of the winner
             this.players[winner_id].score += 1;
-
-            // update the current player
-            this.currentPlayerId = winner_id;
 
             // update the current round number
             this.currentRoundNumber += 1;
@@ -399,8 +381,7 @@ class GameState
             });
 
             // check if the game is over
-            try
-            {
+            try {
                 let winner_ids = this.getGameWinner();
 
                 this.players.forEach((player: Player) => {
@@ -415,14 +396,12 @@ class GameState
                 // update the winner's id
                 this.gameRounds[this.gameRounds.length - 1].winner_id = winner_ids[0];
             }
-            catch (e)
-            {
+            catch (e) {
                 // the game is not over
             }
 
         }
-        else
-        {
+        else {
             // the round is not over
             // update the current player
             this.currentPlayerId = this.players[(this.currentPlayerId + 1) % this.players.length].user.id;
@@ -443,7 +422,7 @@ class GameState
      * @returns Whether the game is over.
      * @param play - The play that was made by the player   
      */
-    isGameOver = (play: PlayTurn) => {}; // TODO: Implement this function
+    isGameOver = (play: PlayTurn) => { }; // TODO: Implement this function
 
     isRangSelected = () => {
         return this.RUNGsuit !== "";
@@ -452,6 +431,6 @@ class GameState
     getHand = (playerId: number) => {
         return this.getPlayerById(playerId)?.hand;
     }
-};  
+};
 
 export default GameState;

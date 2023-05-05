@@ -47,6 +47,22 @@ const generateCardObjects = () => {
     return cards;
 };
 
+// Define the ranking of each card rank
+const rankValues: { [key: string]: number } = {
+    "2": 1,
+    "3": 2,
+    "4": 3,
+    "5": 4,
+    "6": 5,
+    "7": 6,
+    "8": 7,
+    "9": 8,
+    "10": 9,
+    "J": 10,
+    "Q": 11,
+    "K": 12,
+    "A": 13,
+};
 export default class Deck {
     /**
      * @remarks
@@ -109,28 +125,11 @@ export default class Deck {
         this.cardsDeck = generateCardObjects();
     }
 
-    compareCards(card1: Card, card2: Card): boolean {
+    compareCards(card1: Card, card2: Card, valueOnly: boolean = false): boolean {
         // Check if cards are of the same suit
-        if (card1.suit_symbol !== card2.suit_symbol) {
+        if (!valueOnly && card1.suit_symbol !== card2.suit_symbol) {
             return false;
         }
-
-        // Define the ranking of each card rank
-        const rankValues: { [key: string]: number } = {
-            "2": 1,
-            "3": 2,
-            "4": 3,
-            "5": 4,
-            "6": 5,
-            "7": 6,
-            "8": 7,
-            "9": 8,
-            "10": 9,
-            "j": 10,
-            "q": 11,
-            "k": 12,
-            "A": 13,
-        };
 
         // Get the rank value for each card
         const card1Value = rankValues[card1.rank.toString()];

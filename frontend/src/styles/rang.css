@@ -58,6 +58,9 @@ body {
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    padding-right: 250px;
 }
 
 .game-container {
@@ -164,17 +167,26 @@ body {
     justify-content: center;
 }
 
+.send-message-container {
+    /* height: 100px; */
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    padding-top: 15px;
+}
+
 .button-select-rang {
     cursor: pointer;
     border-radius: 4px;
     margin: 4px;
     border: 1px solid grey;
     background: transparent;
-    color: #36454F;
+    color: white;
 }
 
 .button-select-rang:hover {
-    background: lightgray;
+    background: blue;
 }
 
 .button-select-rang:active {

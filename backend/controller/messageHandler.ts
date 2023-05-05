@@ -10,6 +10,7 @@ export default class MessageHandler
     constructor(appState: AppState)
     {
         this.appState = appState;
+        this.onMessageReceived = this.onMessageReceived.bind(this);
     }
 
     public onMessageReceived(socket: Socket, data: any)

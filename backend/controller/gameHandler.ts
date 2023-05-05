@@ -51,7 +51,8 @@ export default class GameHandler {
                 }
             });
         }
-
+        
+        // need to send the player their hand, their score, the current card, and whether it is their turn and other information
         let myPlayerSend = {
             name: thisPlayer.user.user_name,
             hand: thisPlayer.hand,
@@ -175,6 +176,18 @@ export default class GameHandler {
         console.log("current player: " + this.appState.gameState.currentPlayerId)
         console.log("rung chooser: " + this.appState.gameState.rangChooser)
 
+        // if rung has not been selected, then we need to wait for the rung to be selected
+        if (this.appState.gameState.RUNGsuit === "") {
+            socket.emit(GLOBALS.Events.ERROR, {
+                event: GLOBALS.Events.ERROR,
+                data: {
+                    message: "Rung has not been selected yet"
+                }
+            });
+            GameHandler.tempTest = 0;
+            return;
+        }
+
 
         let move: PlayTurn = data.data as PlayTurn;
 
@@ -223,8 +236,7 @@ export default class GameHandler {
                 }
                 );
 
-                this.appState.gameState.players.forEach((player) => 
-                {
+                this.appState.gameState.players.forEach((player) => {
                     // remove the player from the array
                     let temPlayers = players.filter((arrplayer) => arrplayer.user_id !== player.user.id);
 
@@ -237,19 +249,18 @@ export default class GameHandler {
                 }
                 );
 
+            }
+
+        }
+        else {
+            socket.emit(GLOBALS.Events.ERROR, {
+                event: GLOBALS.Events.ERROR,
+                data: {
+                    message: validMoveResult.message
+                }
+            });
         }
 
-    }
-    else
-        {
-    socket.emit(GLOBALS.Events.ERROR, {
-        event: GLOBALS.Events.ERROR,
-        data: {
-            message: validMoveResult.message
-        }
-    });
-}
-
-GameHandler.tempTest = 0;
+        GameHandler.tempTest = 0;
     }
 };
